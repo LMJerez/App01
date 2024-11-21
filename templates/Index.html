@@ -7,49 +7,12 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='CSS/estilos.css') }}">
 </head>
 <body>
-    <div>
-        <h1>Hola, {{ username }}!</h1>
-        <h3>¡Sesión iniciada!</h3>
-    </div>    
-    <!-- Menú Dinámico -->
-    <nav>
-        <ul>
-            <li class="dropdown">
-                <a href="{{ url_for('index', username=username, nivel_acceso=nivel_acceso) }}" class="dropbtn">Inicio</a>                
-            </li>
-            {% if nivel_acceso >= 1 %}
-                <li class="dropdown">
-                    <a href="#" class="dropbtn">Estudiante</a>
-                </li class="dropdown">
-            {% endif %}
-            {% if nivel_acceso >= 2 %}
-                <li class="dropdown">
-                    <a href="#" class="dropbtn">Profesor</a>
-                </li>
-            {% endif %}
-            {% if nivel_acceso >= 3 %}
-                <li class="dropdown">
-                    <a href="#" class="dropbtn">Administración</a>
-                    <div class="dropdown-content">
-                        <a href="{{ url_for('gestion_usuarios') }}">Gestionar usuarios</a>
-                    </div>
-                </li>
-            {% endif %}
-            <!-- Submenú de Sesión -->
-            <li class="dropdown">
-                <a href="#" class="dropbtn">Sesión</a>
-                <div class="dropdown-content">
-                    {% if session.username %}
-                        <!-- Mostrar solo si la sesión está iniciada -->
-                        <a href="{{ url_for('logout') }}">Cerrar sesión</a>
-                    {% else %}
-                        <!-- Mostrar si no hay sesión -->
-                        <a href="{{ url_for('login') }}">Iniciar sesión</a>
-                    {% endif %}
-                </div>
-            </li>
-        </ul>
-    </nav>
+    <!-- Incluir el menú principal -->
+    {% include 'menu_principal.html' %}
 
+    <h1>Hola, {{ username }}!</h1>
+    <h3>Sesión iniciada, nivel: {{ nivel_acceso }}</h3>
+
+    <!-- Aquí iría el contenido específico de la página -->
 </body>
 </html>

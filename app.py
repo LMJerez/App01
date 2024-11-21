@@ -121,12 +121,17 @@ def register():
     return render_template("register.html")
 
 # Ruta para manejar la página principal después de iniciar sesión
-@app.route("/index/<username>/<int:nivel_acceso>")
-def index(username, nivel_acceso):
+@app.route("/index")
+def index():
     # Validar que el usuario tenga sesión iniciada
-    if 'username' not in session or session['username'] != username:
+    if 'username' not in session:
         flash("Inicia sesión para continuar.", "error")
         return redirect(url_for("login"))
+
+    # Obtener las variables 'username' y 'nivel_acceso' desde la sesión
+    username = session['username']
+    nivel_acceso = session.get('nivel_acceso', 1)  # Usar el nivel de acceso almacenado o por defecto 1
+
     return render_template("index.html", username=username, nivel_acceso=nivel_acceso)
 
 # Ruta para la administracion de ususarios
@@ -136,6 +141,12 @@ def gestion_usuarios():
     if 'username' not in session:
         flash("Por favor, inicia sesión primero.", "error")
         return redirect(url_for('login'))
+    
+    # Verificar el nivel de acceso antes de mostrar el contenido
+    nivel_acceso = session.get('nivel_acceso', 1)
+    if nivel_acceso < 3:
+        flash("No tienes permiso para acceder a esta página.", "error")
+        return redirect(url_for('index'))
     
     # Obtener los datos de los usuarios
     conexion = sqlite3.connect('BD/usuarios.db')
