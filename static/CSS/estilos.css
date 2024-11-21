@@ -102,6 +102,7 @@ p a:hover {
     text-decoration: underline;
 }
 
+/* - BARRA DE NAVEGACION - */
 /* Estilos generales para el nav */
 /* Eliminar sombreado y fondo del contenedor nav */
 nav {
@@ -207,7 +208,75 @@ nav .dropdown:hover .dropdown-content {
     display: block;
 }
 
-/* Opciones de responsividad */
+/* - TABLAS - */
+/* Estilo general para todas las tablas */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 18px;
+    text-align: left;
+}
+
+th, td {
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+}
+
+th {
+    background-color: #4CAF50;
+    color: white;
+}
+
+tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+tr:hover {
+    background-color: #f1f1f1;
+}
+
+/* Estilos específicos por contenido */
+
+/* Estilo base para las celdas de la columna ID */
+.id {
+    text-align: center; /* Centrar el contenido */
+    width: 5%;
+    padding: 10px;
+    cursor: pointer; /* Apunta que es interactivo */
+    background-color: #f9f9f9; /* Fondo claro */
+    border: 1px solid #ddd;
+    border-radius: 5px; /* Bordes redondeados */
+    transition: background-color 0.3s ease, transform 0.2s ease; /* Efectos suaves */
+}
+
+/* Hover: Cambiar apariencia al pasar el ratón */
+.id:hover {
+    background-color: #e0e0e0; /* Fondo más oscuro al pasar el ratón */
+    transform: scale(1.05); /* Ampliar ligeramente */
+}
+
+/* Estado seleccionado */
+.id.selected {
+    background-color: #4CAF50; /* Fondo verde */
+    color: white; /* Texto blanco */
+    border-color: #45a049; /* Bordes verdes */
+    transform: scale(1); /* Tamaño normal al estar seleccionado */
+}
+
+/* Estilo base para las celdas de la columna password */
+.password {
+    font-family: monospace;
+    font-size: 0.9rem;
+    word-break: break-all;
+}
+
+/* Estilo base para las celdas de la columna check */
+.check {
+    text-align: center;
+}
+
+/* - Opciones de responsividad - */
 @media (max-width: 768px) {
     nav {
         flex-direction: column; /* Cambiar a disposición vertical en pantallas pequeñas */
@@ -219,7 +288,7 @@ nav .dropdown:hover .dropdown-content {
     }
 }
 
-/* Mensajes de error */
+/* - Mensajes de error - */
 li.error {
     color: red;
     font-weight: bold;

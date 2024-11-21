@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Usuarios</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='CSS/estilos.css') }}">
+    <!-- Archivo de JavaScript para selección de celdas de la clase id -->
+    <script src="{{ url_for('static', filename='JS/tabla_interactiva.js') }}"></script>
+</head>
+<body>
+    <table>
+        <thead>
+            <tr>
+                <th class="id">ID</th>
+                <th>Nombre de Usuario</th>
+                <th class="password">Password (Hashed)</th>
+                <th>Nivel de Acceso</th>
+                <th>Teléfono</th>
+                <th>Correo Electrónico</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for usuario in usuarios %}
+                <tr>
+                    <td class="id" onclick="toggleSelection(this)">{{ usuario[0] }}</td>
+                    <td>{{ usuario[1] }}</td>
+                    <td class="password">{{ usuario[2] }}</td>
+                    <td>{{ usuario[3] }}</td>
+                    <td>{{ usuario[4] }}</td>
+                    <td>{{ usuario[5] }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <button id="mi-boton">Realizar acción</button>
+</body>
+</html>

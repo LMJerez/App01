@@ -14,9 +14,11 @@ def inicializar_bd():
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         username TEXT UNIQUE NOT NULL,
         password TEXT NOT NULL,
-        nivel_acceso INTEGER DEFAULT 1       
+        nivel_acceso INTEGER DEFAULT 1,
+        telefono TEXT,
+        correo TEXT
     )
-    ''')  
+    ''')
 
     # Guardar cambios y cerrar conexión
     conexion.commit()
@@ -118,7 +120,7 @@ def register():
     
     return render_template("register.html")
 
-# Ruta para para manejar la página principal después de iniciar sesión
+# Ruta para manejar la página principal después de iniciar sesión
 @app.route("/index/<username>/<int:nivel_acceso>")
 def index(username, nivel_acceso):
     # Validar que el usuario tenga sesión iniciada
@@ -126,6 +128,22 @@ def index(username, nivel_acceso):
         flash("Inicia sesión para continuar.", "error")
         return redirect(url_for("login"))
     return render_template("index.html", username=username, nivel_acceso=nivel_acceso)
+
+# Ruta para la administracion de ususarios
+@app.route("/gestion-usuarios")
+def gestion_usuarios():
+    # Conexión a la base de datos
+    conexion = sqlite3.connect('BD/usuarios.db')
+    cursor = conexion.cursor()
+ 
+    # Obtener todos los datos necesarios en orden alfabético
+    cursor.execute('SELECT id, username, password, nivel_acceso, telefono, correo FROM usuarios ORDER BY username ASC')
+    usuarios = cursor.fetchall()
+
+    conexion.close()
+
+    # Pasar los datos a la plantilla
+    return render_template("gestion_usuarios.html", usuarios=usuarios)
 
 # Llamar a la función para inicializar la base de datos
 if __name__ == "__main__":
