@@ -132,18 +132,22 @@ def index(username, nivel_acceso):
 # Ruta para la administracion de ususarios
 @app.route("/gestion-usuarios")
 def gestion_usuarios():
-    # Conexión a la base de datos
+    # Verificar si el usuario está autenticado
+    if 'username' not in session:
+        flash("Por favor, inicia sesión primero.", "error")
+        return redirect(url_for('login'))
+    
+    # Obtener los datos de los usuarios
     conexion = sqlite3.connect('BD/usuarios.db')
     cursor = conexion.cursor()
- 
-    # Obtener todos los datos necesarios en orden alfabético
+
     cursor.execute('SELECT id, username, password, nivel_acceso, telefono, correo FROM usuarios ORDER BY username ASC')
     usuarios = cursor.fetchall()
 
     conexion.close()
 
-    # Pasar los datos a la plantilla
-    return render_template("gestion_usuarios.html", usuarios=usuarios)
+    # Pasar los datos de la base de datos y la sesión a la plantilla
+    return render_template("gestion_usuarios.html", usuarios=usuarios, username=session['username'], nivel_acceso=session['nivel_acceso'])
 
 # Llamar a la función para inicializar la base de datos
 if __name__ == "__main__":

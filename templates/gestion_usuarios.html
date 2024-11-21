@@ -9,6 +9,10 @@
     <script src="{{ url_for('static', filename='JS/tabla_interactiva.js') }}"></script>
 </head>
 <body>
+    <!-- Incluir el menú principal -->
+    {% include 'menu_principal.html' %}
+    
+    <h1>Gestión de Usuarios</h1>
     <table>
         <thead>
             <tr>
