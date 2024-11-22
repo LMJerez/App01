@@ -1,7 +1,9 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session
+from datetime import datetime, timedelta
 import sqlite3
 import bcrypt
 import re
+
 
 def inicializar_bd():
     # Crear conexión a la base de datos
@@ -13,16 +15,18 @@ def inicializar_bd():
     CREATE TABLE IF NOT EXISTS usuarios (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         username TEXT UNIQUE NOT NULL,
-        password TEXT NOT NULL,
+        password TEXT NOT NULL,        
         nivel_acceso INTEGER DEFAULT 1,
         telefono TEXT,
-        correo TEXT
+        correo TEXT,
+        password_last_updated TEXT
     )
     ''')
-
+    
     # Guardar cambios y cerrar conexión
     conexion.commit()
     conexion.close()
+
     print("Base de datos inicializada correctamente.")
 
 def registrar_usuario(username, password):
@@ -37,9 +41,14 @@ def registrar_usuario(username, password):
     # Hashear la contraseña
     hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
 
+    # Obtener la fecha actual
+    fecha_actualizacion = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
     # Insertar el usuario en la base de datos
     try:
-        cursor.execute('INSERT INTO usuarios (username, password) VALUES (?, ?)', (username, hashed_password))
+        cursor.execute('''
+            INSERT INTO usuarios (username, password, password_last_updated)
+            VALUES (?, ?, ?)''', (username, hashed_password, fecha_actualizacion))
         conexion.commit()
         print("Usuario registrado exitosamente.")
         return None  # No hay error, todo está bien
@@ -74,6 +83,19 @@ def validar_contrasena(password):
     if re.match(patron, password):
         return True
     return False
+
+# Función de validación de seguridad de la contraseña para actualizacion
+def es_contrasena_actualizada(fecha_actualizacion):
+    if not fecha_actualizacion:
+        return False, None  # Si no hay fecha registrada, se considera desactualizada
+
+    fecha_actualizacion = datetime.strptime(fecha_actualizacion, "%Y-%m-%d %H:%M:%S")
+    hoy = datetime.now()
+    dias_transcurridos = (hoy - fecha_actualizacion).days
+
+    # Considerar "actualizada" si la contraseña se cambió hace menos de 90 días
+    esta_actualizada = dias_transcurridos < 90
+    return esta_actualizada, dias_transcurridos
 
 app = Flask(__name__)
 
@@ -142,8 +164,10 @@ def gestion_usuarios():
         flash("Por favor, inicia sesión primero.", "error")
         return redirect(url_for('login'))
     
+    username = session['username']    
     # Verificar el nivel de acceso antes de mostrar el contenido
     nivel_acceso = session.get('nivel_acceso', 1)
+
     if nivel_acceso < 3:
         flash("No tienes permiso para acceder a esta página.", "error")
         return redirect(url_for('index'))
@@ -152,13 +176,34 @@ def gestion_usuarios():
     conexion = sqlite3.connect('BD/usuarios.db')
     cursor = conexion.cursor()
 
-    cursor.execute('SELECT id, username, password, nivel_acceso, telefono, correo FROM usuarios ORDER BY username ASC')
+    cursor.execute('''
+        SELECT id, username, nivel_acceso, telefono, correo, password_last_updated
+        FROM usuarios
+        ORDER BY username ASC
+    ''')
     usuarios = cursor.fetchall()
 
     conexion.close()
 
+    # Calcular el estado de la contraseña
+    usuarios_estado = [
+        (
+            id, username, nivel_acceso, telefono, correo,
+            f"{'Actualizada' if actualizada else 'Desactualizada'} ({dias} días)"
+            if dias is not None else "Nunca actualizada"
+        )
+        for id, username, nivel_acceso, telefono, correo, password_last_updated 
+        in usuarios
+        for actualizada, dias in [es_contrasena_actualizada(password_last_updated)]
+    ]
+
     # Pasar los datos de la base de datos y la sesión a la plantilla
-    return render_template("gestion_usuarios.html", usuarios=usuarios, username=session['username'], nivel_acceso=session['nivel_acceso'])
+    return render_template(
+        "gestion_usuarios.html",
+        usuarios=usuarios_estado,
+        username=username,
+        nivel_acceso=nivel_acceso
+    )
 
 # Llamar a la función para inicializar la base de datos
 if __name__ == "__main__":

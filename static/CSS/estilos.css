@@ -208,6 +208,52 @@ nav .dropdown:hover .dropdown-content {
     display: block;
 }
 
+/* - BARRAS DE HERRAMIENTAS - */
+/* Barra de herramientas */
+.toolbar {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.toolbar ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.toolbar li {
+    margin: 0;
+}
+
+.toolbar button {
+    padding: 10px 15px;
+    font-size: 14px;
+    color: white;
+    background-color: #4CAF50;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.toolbar button:hover {
+    background-color: #45a049;
+}
+
+.toolbar button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
 /* - TABLAS - */
 /* Estilo general para todas las tablas */
 table {
