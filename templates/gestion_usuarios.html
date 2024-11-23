@@ -72,6 +72,10 @@
                 </tr>
             {% endfor %}
         </tbody>
-    </table>    
+    </table>
+    <!-- Archivo para manejar la tabla -->
+    <script src="{{ url_for('static', filename='JS/tabla_interactiva.js') }}"></script>
+    <!-- Archivo para manejar la barra de herramientas -->
+    <script src="{{ url_for('static', filename='JS/toolbar_actions.js') }}"></script>
 </body>
 </html>

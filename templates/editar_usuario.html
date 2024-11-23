@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='CSS/estilos.css') }}">
 </head>
 <body>
+    <h2>Editar Usuario</h2>
     <form method="POST">
         <label for="username">Nombre:</label>
         <input type="text" name="username" id="username" value="{{ username }}" required><br>
@@ -22,10 +23,13 @@
             <input type="password" name="password" id="password">
             <button type="button" id="toggle-password">Mostrar</button>
         </div><br>
-    
-        <button type="submit">Guardar Cambios</button>
+        
+        <!-- Botones -->
+        <div class="form-buttons">
+            <button type="submit">Guardar Cambios</button>
+            <a href="{{ url_for('gestion_usuarios') }}" class="button">Volver</a>
+        </div>
     </form>
-    <a href="{{ url_for('gestion_usuarios') }}">Volver</a>
 
     <!-- Agregar el archivo JS -->
     <script src="{{ url_for('static', filename='JS/toggle-password.js') }}"></script>
