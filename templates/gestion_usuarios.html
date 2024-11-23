@@ -17,20 +17,34 @@
         <!-- Datos de session -->
         <h3>Sesión iniciada: usuario {{ username }}, nivel {{ nivel_acceso }}</h3>
     </div>
-
+    
     <!-- Barra de herramientas -->
     <nav class="toolbar">
         <ul>
-            <li><button onclick="changeAccessLevel()">Cambiar Nivel de Acceso</button></li>
-            <li><button onclick="updatePhone()">Actualizar Teléfono</button></li>
-            <li><button onclick="updateEmail()">Actualizar Correo</button></li>
-            <li><button onclick="updatePassword()">Actualizar Contraseña</button></li>
-            <li><button onclick="sendMessageToSelected()">Enviar Mensaje</button></li>
-        </ul>
-        <ul>
-            <li><button onclick="sendMassMessage()">Enviar Mensajes a Todos</button></li>
-            <li><button onclick="sendMassEmail()">Enviar Correos a Todos</button></li>
-            <li><button onclick="notifyOutdatedPasswords()">Notificar Contraseñas Desactualizadas</button></li>
+            <!-- Submenú para Actualizar datos -->
+            <li class="dropdown">
+                <a href="#" class="dropbtn">Actualizar</a>
+                <div class="dropdown-content">
+                    <a href="#" onclick="editUser()">Datos de usuario</a>
+                    <a href="#" onclick="userAccessLevel()">Nivel de acceso usuario</a>
+                    <a href="#" onclick="reportUsersWithoutData()">Notificar usuarios sin datos</a>                    
+                </div>
+            </li>
+            <!-- Submenú para Enviar Mensajes -->
+            <li class="dropdown">
+                <a href="#" class="dropbtn">Mensajes</a>
+                <div class="dropdown-content">
+                    <a href="#" onclick="messageToUser()">Individual</a>
+                    <a href="#" onclick="broadcastMessage()">Difusión</a>
+                </div>
+            </li>
+            <!-- Submenú para Seguridad -->
+            <li class="dropdown">
+                <a href="#" class="dropbtn">Seguridad</a>
+                <div class="dropdown-content">
+                    <a href="#" onclick="ReportOutdatedPasswords()">Notificar contraseñas desactualizadas</a>                    
+                </div>
+            </li>
         </ul>
     </nav>
 
@@ -48,7 +62,7 @@
         </thead>
         <tbody>
             {% for usuario in usuarios %}
-                <tr>
+                <tr data-id="{{ usuario[0] }}">
                     <td class="id" onclick="toggleSelection(this)">{{ usuario[0] }}</td>
                     <td>{{ usuario[1] }}</td> <!-- Nombre usuario -->
                     <td>{{ usuario[2] }}</td> <!-- Nivel acceso -->
@@ -58,7 +72,6 @@
                 </tr>
             {% endfor %}
         </tbody>
-    </table>
-    <button id="mi-boton">Realizar acción</button>
+    </table>    
 </body>
 </html>

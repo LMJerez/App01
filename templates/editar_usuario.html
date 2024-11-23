@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar usuario</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='CSS/estilos.css') }}">
+</head>
+<body>
+    <form method="POST">
+        <label for="username">Nombre:</label>
+        <input type="text" name="username" id="username" value="{{ username }}" required><br>
+    
+        <label for="telefono">Teléfono:</label>
+        <input type="text" name="telefono" id="telefono" value="{{ telefono }}" required><br>
+    
+        <label for="correo">Correo:</label>
+        <input type="email" name="correo" id="correo" value="{{ correo }}" required><br>
+    
+        <label for="password">Nueva Contraseña (Opcional):</label>
+        <div class="div-toggle-password">
+            <input type="password" name="password" id="password">
+            <button type="button" id="toggle-password">Mostrar</button>
+        </div><br>
+    
+        <button type="submit">Guardar Cambios</button>
+    </form>
+    <a href="{{ url_for('gestion_usuarios') }}">Volver</a>
+
+    <!-- Agregar el archivo JS -->
+    <script src="{{ url_for('static', filename='JS/toggle-password.js') }}"></script>
+</body>
+</html>

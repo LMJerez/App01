@@ -205,6 +205,67 @@ def gestion_usuarios():
         nivel_acceso=nivel_acceso
     )
 
+# -- Rutas para manejar las acciones desde la Barras de Herramientas --
+# Rutas para actualizar datos de usuario
+@app.route("/actualizar/datos-usuario/<int:user_id>", methods=["GET", "POST"])
+def actualizar_datos_usuario(user_id):
+    if 'username' not in session:
+        flash("Por favor, inicia sesión primero.", "error")
+        return redirect(url_for('login'))
+
+    conexion = sqlite3.connect('BD/usuarios.db')
+    cursor = conexion.cursor()
+
+    if request.method == "POST":
+        # Obtener los datos del formulario
+        nuevo_nombre = request.form["username"]
+        nuevo_telefono = request.form["telefono"]
+        nuevo_correo = request.form["correo"]
+        nueva_contrasena = request.form.get("password", "").strip()
+
+        # Validar y procesar la nueva contraseña
+        hashed_password = None
+        fecha_actualizacion = None
+        if nueva_contrasena:  # Si se ingresa una nueva contraseña
+            if not validar_contrasena(nueva_contrasena):
+                flash("La contraseña debe tener al menos 6 caracteres, una mayúscula, una minúscula y un número.", "error")
+                return redirect(request.url)
+
+            hashed_password = bcrypt.hashpw(nueva_contrasena.encode('utf-8'), bcrypt.gensalt())
+            fecha_actualizacion = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+        # Actualizar los datos en la base de datos
+        if hashed_password and fecha_actualizacion:
+            cursor.execute('''
+                UPDATE usuarios
+                SET username = ?, telefono = ?, correo = ?, password = ?, password_last_updated = ?
+                WHERE id = ?
+            ''', (nuevo_nombre, nuevo_telefono, nuevo_correo, hashed_password, fecha_actualizacion, user_id))
+        else:
+            cursor.execute('''
+                UPDATE usuarios
+                SET username = ?, telefono = ?, correo = ?
+                WHERE id = ?
+            ''', (nuevo_nombre, nuevo_telefono, nuevo_correo, user_id))
+
+        conexion.commit()
+        conexion.close()
+
+        flash("Datos del usuario actualizados correctamente.", "success")
+        return redirect(url_for("gestion_usuarios"))
+
+    # Obtener los datos actuales del usuario
+    cursor.execute('SELECT username, telefono, correo FROM usuarios WHERE id = ?', (user_id,))
+    usuario = cursor.fetchone()
+    conexion.close()
+
+    if not usuario:
+        flash("Usuario no encontrado.", "error")
+        return redirect(url_for("gestion_usuarios"))
+
+    return render_template("editar_usuario.html", user_id=user_id, username=usuario[0], telefono=usuario[1], correo=usuario[2])
+
+
 # Llamar a la función para inicializar la base de datos
 if __name__ == "__main__":
     inicializar_bd()  # Asegúrate de que la base de datos esté creada

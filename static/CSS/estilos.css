@@ -71,6 +71,12 @@ button[type="submit"]:hover {
 }
 
 /* Estilo para el botón de ver contraseña */
+div .div-toggle-password{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
 button#toggle-password {
     background-color: transparent;
     color: #555;
@@ -210,48 +216,85 @@ nav .dropdown:hover .dropdown-content {
 
 /* - BARRAS DE HERRAMIENTAS - */
 /* Barra de herramientas */
+/* Barra de herramientas (estilo general) */
 .toolbar {
+    background-color: #45a049; /* Fondo verde similar al menú principal */
+    padding: 10px 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); /* Sombra para efecto flotante */
     display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-bottom: 20px;
-    padding: 10px;
-    background-color: #f9f9f9;
-    border: 1px solid #ddd;
-    border-radius: 5px;
+    justify-content: center; /* Centrar horizontalmente */
+    gap: 20px; /* Espaciado entre submenús */
 }
 
+/* Estilo para los submenús */
 .toolbar ul {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
     list-style: none;
-    padding: 0;
+    padding: 2px;
     margin: 0;
+    display: flex;
+    gap: 20px;
 }
 
-.toolbar li {
-    margin: 0;
-}
-
-.toolbar button {
-    padding: 10px 15px;
-    font-size: 14px;
+/* Botones principales de la barra */
+.toolbar a {
     color: white;
-    background-color: #4CAF50;
-    border: none;
-    border-radius: 5px;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: bold;
+    padding: 10px 20px;
+    background-color: #4CAF50; /* Verde oscuro */
+    border-radius: 8px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); /* Sombra suave */
+}
+
+/* Hover en los botones principales */
+.toolbar a:hover {
+    background-color: #3e8e41; /* Verde más oscuro */
+    transform: translateY(-3px); /* Efecto flotante */
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.3);
+}
+
+/* Estilo para los submenús */
+.toolbar .dropdown {
+    position: relative;
+}
+
+.toolbar .dropdown .dropbtn {
     cursor: pointer;
+}
+
+.toolbar .dropdown-content {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background-color: #f9f9f9; /* Fondo claro */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); /* Sombra para el submenú */
+    border-radius: 8px;
+    z-index: 1;
+    flex-direction: column;
+}
+
+.toolbar .dropdown-content a {
+    color: #333;
+    padding: 10px 15px;
+    text-decoration: none;
+    display: block;
+    font-size: 14px;
     transition: background-color 0.3s ease;
+    border-radius: 5px;
 }
 
-.toolbar button:hover {
-    background-color: #45a049;
+/* Hover en opciones del submenú */
+.toolbar .dropdown-content a:hover {
+    background-color: #e0e0e0;
 }
 
-.toolbar button:disabled {
-    background-color: #ccc;
-    cursor: not-allowed;
+/* Mostrar el submenú al pasar el ratón */
+.toolbar .dropdown:hover .dropdown-content {
+    display: flex;
 }
 
 /* - TABLAS - */
