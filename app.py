@@ -1,9 +1,8 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask import Flask, jsonify, render_template, request, redirect, url_for, flash, session
 from datetime import datetime, timedelta
 import sqlite3
 import bcrypt
 import re
-
 
 def inicializar_bd():
     # Crear conexión a la base de datos
@@ -264,6 +263,30 @@ def actualizar_datos_usuario(user_id):
         return redirect(url_for("gestion_usuarios"))
 
     return render_template("editar_usuario.html", user_id=user_id, username=usuario[0], telefono=usuario[1], correo=usuario[2])
+
+# Rutas para actualizar nivel de acceso de usuario
+@app.route("/actualizar-nivel-acceso/<int:user_id>", methods=["POST"])
+def actualizar_nivel_acceso(user_id):
+    if 'username' not in session:
+        return jsonify({"error": "No autorizado"}), 401
+
+    data = request.get_json()
+    nuevo_nivel = data.get("nivel_acceso")
+
+    # Validar el nivel de acceso
+    if nuevo_nivel not in [1, 2, 3]:
+        return jsonify({"error": "Nivel de acceso inválido"}), 400
+
+    try:
+        conexion = sqlite3.connect('BD/usuarios.db')
+        cursor = conexion.cursor()
+        cursor.execute("UPDATE usuarios SET nivel_acceso = ? WHERE id = ?", (nuevo_nivel, user_id))
+        conexion.commit()
+        conexion.close()
+        return jsonify({"message": "Nivel de acceso actualizado correctamente"}), 200
+    except Exception as e:
+        print(f"Error al actualizar el nivel de acceso: {e}")
+        return jsonify({"error": "Error interno del servidor"}), 500
 
 
 # Llamar a la función para inicializar la base de datos
