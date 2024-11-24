@@ -21,6 +21,19 @@ def inicializar_bd():
         password_last_updated TEXT
     )
     ''')
+
+    # Crear tabla de mensajes
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS mensajes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        asunto TEXT NOT NULL,
+        mensaje TEXT NOT NULL,
+        usuario_id INTEGER,
+        fecha_envio TEXT NOT NULL DEFAULT (DATETIME('now')),
+        fecha_entregado TEXT,
+        FOREIGN KEY(usuario_id) REFERENCES usuarios(id)
+    )
+    ''')
     
     # Guardar cambios y cerrar conexión
     conexion.commit()

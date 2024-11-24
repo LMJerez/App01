@@ -55,6 +55,23 @@ input[type="email"]:focus {
     outline: none;
 }
 
+select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+select:focus {
+    border-color: #4CAF50; /* Verde */
+    outline: none;
+    box-shadow: 0 0 8px rgba(76, 175, 80, 0.5); /* Efecto al enfocar */
+}
+
 /* Botón de submit */
 button[type="submit"] {
     width: 100%;
@@ -415,6 +432,31 @@ tr:hover {
 .form-buttons .button:hover {
     background-color: #c4830b; /* Rojo más oscuro */
     transform: translateY(-2px);
+}
+
+/* - DIALOG - */
+/* Estilo principal del <dialog> */
+dialog {
+    border: none;
+    border-radius: 5px;    
+    background-color: white; /* Fondo */    
+    padding: 6px;
+    width: 340px;
+    max-width: 90%; /* Adaptación a pantallas pequeñas */
+    text-align: center;    
+    position: fixed;    /* Asegura que se posicione relativo a la ventana */
+    top: 50%;   /* Posiciona el elemento verticalmente al 50% */
+    left: 50%;  /* Posiciona el elemento horizontalmente al 50% */
+    transform: translate(-50%, -50%);   /* Centra el elemento ajustando su referencia */
+}
+
+/* Fondo oscuro al mostrar el diálogo */
+dialog::backdrop {
+    background-color: rgba(0, 0, 0, 0.5); /* Fondo semitransparente */
+}
+
+dialog select:focus {    
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.5); /* Efecto al enfocar */
 }
 
 /* - RESPONSITIVIDAD - */
