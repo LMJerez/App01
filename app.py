@@ -71,22 +71,30 @@ def registrar_usuario(username, password):
         conexion.close()
 
 def validar_usuario(username, password):
-    # Conexión a la base de datos
+    print(f"Validando usuario: {username}")  # Depuración
+
     conexion = sqlite3.connect('BD/usuarios.db')
     cursor = conexion.cursor()
 
-    # Buscar la contraseña y el nivel de acceso del usuario
     cursor.execute('SELECT password, nivel_acceso FROM usuarios WHERE username = ?', (username,))
     resultado = cursor.fetchone()
     conexion.close()
 
-    # Validar las credenciales
+    print(f"Resultado de consulta SQL para {username}: {resultado}")  # Depuración
+
     if resultado:
-        hashed_password, nivel_acceso = resultado        
-        # Validar contraseña encriptada
+        hashed_password, nivel_acceso = resultado
+        print(f"Contraseña almacenada: {hashed_password}")  # Depuración
+
         if bcrypt.checkpw(password.encode('utf-8'), hashed_password):
-            return nivel_acceso  # Devuelve el nivel de acceso si es válido
-    return None  # Retorna None si no son válidas las credenciales
+            print(f"Usuario validado correctamente. Nivel de acceso: {nivel_acceso}")  # Depuración
+            return nivel_acceso
+        else:
+            print("Contraseña incorrecta.")  # Depuración
+    else:
+        print("Usuario no encontrado.")  # Depuración
+
+    return None
 
 # Función de validación de la contraseña
 def validar_contrasena(password):
@@ -121,14 +129,29 @@ def login():
         username = request.form["username"]
         password = request.form["password"]
 
+        print(f"Intentando validar usuario: {username}")  # Depuración
+
+        # Obtener el nivel de acceso y el id del usuario al validar las credenciales
         nivel_acceso = validar_usuario(username, password)
+        
         if nivel_acceso is not None:
-            # Guardar usuario en la sesión
+            # Obtener el ID del usuario de la base de datos
+            conexion = sqlite3.connect('BD/usuarios.db')
+            cursor = conexion.cursor()
+            cursor.execute('SELECT id FROM usuarios WHERE username = ?', (username,))
+            user_id = cursor.fetchone()[0]  # Obtener el ID del usuario
+            conexion.close()
+
+            # Almacenar el user_id y el nivel de acceso en la sesión
+            session['user_id'] = user_id
             session['username'] = username
             session['nivel_acceso'] = nivel_acceso
-            return redirect(url_for("index", username=username, nivel_acceso=nivel_acceso))
+
+            print(f"Inicio de sesión exitoso para {username} con nivel de acceso {nivel_acceso}")  # Depuración
+            return redirect(url_for("index"))
         else:
             flash("Credenciales incorrectas, intenta nuevamente.", "error")
+
     return render_template("login.html")
 
 @app.route("/logout")
@@ -159,12 +182,14 @@ def register():
 def index():
     # Validar que el usuario tenga sesión iniciada
     if 'username' not in session:
+        print("Sesión no encontrada. Redirigiendo al login.")  # Depuración
         flash("Inicia sesión para continuar.", "error")
         return redirect(url_for("login"))
 
     # Obtener las variables 'username' y 'nivel_acceso' desde la sesión
     username = session['username']
     nivel_acceso = session.get('nivel_acceso', 1)  # Usar el nivel de acceso almacenado o por defecto 1
+    print(f"Sesión activa: Usuario: {username}, Nivel de acceso: {nivel_acceso}")  # Depuración
 
     return render_template("index.html", username=username, nivel_acceso=nivel_acceso)
 
@@ -301,6 +326,43 @@ def actualizar_nivel_acceso(user_id):
         print(f"Error al actualizar el nivel de acceso: {e}")
         return jsonify({"error": "Error interno del servidor"}), 500
 
+# Rutas para mensajes leidos por usuario
+# Ruta para obtener mensajes
+@app.route("/mensajes/<int:usuario_id>")
+def obtener_mensajes(usuario_id):
+    try:
+        conexion = sqlite3.connect('BD/usuarios.db')
+        cursor = conexion.cursor()
+
+        # Obtener mensajes de difusión y específicos no leídos
+        cursor.execute('''
+        SELECT id, asunto, mensaje, fecha_envio
+        FROM mensajes
+        WHERE (usuario_id IS NULL OR usuario_id = ?) AND fecha_entregado IS NULL
+        ''', (usuario_id,))
+        mensajes = cursor.fetchall()
+
+        print("Mensajes obtenidos:", mensajes)  # Depuración
+
+        # Marcar como leídos (registrar fecha_entregado)
+        fecha_entregado = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        if mensajes:
+            print("Marcando como entregados los mensajes con IDs:", [mensaje[0] for mensaje in mensajes])
+            cursor.executemany(
+                'UPDATE mensajes SET fecha_entregado = ? WHERE id = ?',
+                [(fecha_entregado, mensaje[0]) for mensaje in mensajes]
+            )
+        conexion.commit()
+        conexion.close()
+
+        # Devolver los mensajes en formato JSON
+        return jsonify([
+            {"id": mensaje[0], "asunto": mensaje[1], "mensaje": mensaje[2], "fecha_envio": mensaje[3]}
+            for mensaje in mensajes
+        ])
+    except Exception as e:
+        print("Error al obtener mensajes:", e)  # Depuración
+        return jsonify({"error": "Error interno del servidor"}), 500
 
 # Llamar a la función para inicializar la base de datos
 if __name__ == "__main__":

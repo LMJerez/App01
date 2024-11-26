@@ -6,7 +6,7 @@
     <title>App01</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='CSS/estilos.css') }}">
 </head>
-<body>
+<body data-usuario-id="{{ session['user_id'] }}">
     <!-- Incluir el menú principal -->
     {% include 'menu_principal.html' %}
 
@@ -14,5 +14,11 @@
     <h3>Sesión iniciada, nivel: {{ nivel_acceso }}</h3>
 
     <!-- Aquí iría el contenido específico de la página -->
+
+    <!-- Área donde se mostrarán los mensajes -->
+    <div id="mensajes"><p>mensajes</p></div>
+
+    <!-- Agregar el archivo de notificaciones -->
+    <script src="{{ url_for('static', filename='JS/notificaciones.js') }}"></script>
 </body>
 </html>
