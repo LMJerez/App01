@@ -28,7 +28,7 @@ def inicializar_bd():
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         asunto TEXT NOT NULL,
         mensaje TEXT NOT NULL,
-        usuario_id INTEGER,
+        usuario_id INTEGER NOT NULL,
         fecha_envio TEXT NOT NULL DEFAULT (DATETIME('now')),
         fecha_entregado TEXT,
         FOREIGN KEY(usuario_id) REFERENCES usuarios(id)
@@ -117,6 +117,63 @@ def es_contrasena_actualizada(fecha_actualizacion):
     esta_actualizada = dias_transcurridos < 90
     return esta_actualizada, dias_transcurridos
 
+# Función para crear mensajes
+def crear_mensaje(asunto, mensaje, usuario_id=None):
+    """
+    Crea un mensaje en la base de datos.
+    - Si `usuario_id` es None, se crea un mensaje para todos los usuarios activos.
+    """
+    conexion = sqlite3.connect('BD/usuarios.db')
+    cursor = conexion.cursor()
+
+    if usuario_id is None:
+        # Crear mensajes individuales para cada usuario activo
+        cursor.execute('SELECT id FROM usuarios')
+        usuarios = cursor.fetchall()
+
+        for user in usuarios:
+            cursor.execute('''
+            INSERT INTO mensajes (asunto, mensaje, usuario_id, fecha_envio)
+            VALUES (?, ?, ?, DATETIME('now'))
+            ''', (asunto, mensaje, user[0]))
+    else:
+        # Crear mensaje individual para un usuario específico
+        cursor.execute('''
+        INSERT INTO mensajes (asunto, mensaje, usuario_id, fecha_envio)
+        VALUES (?, ?, ?, DATETIME('now'))
+        ''', (asunto, mensaje, usuario_id))
+
+    conexion.commit()
+    conexion.close()
+    print(f"Mensaje '{asunto}' creado correctamente.")
+
+# Función para verificar usuarios sin datos (teléfono o correo) y notificarles
+def notificar_usuarios_sin_datos():
+    conexion = sqlite3.connect('BD/usuarios.db')
+    cursor = conexion.cursor()
+
+    # Consultar los usuarios que tienen teléfono o correo vacío
+    cursor.execute('''
+        SELECT id, username, telefono, correo FROM usuarios
+        WHERE telefono IS NULL OR correo IS NULL
+    ''')
+    usuarios_sin_datos = cursor.fetchall()
+
+    # Enviar un mensaje a los usuarios sin datos
+    for usuario in usuarios_sin_datos:
+        id_usuario, username, telefono, correo = usuario
+        asunto = "Actualiza tus datos"
+        mensaje = "Hola, tu información de contacto está incompleta. Por favor, actualiza tu teléfono o correo."
+
+        # Crear un mensaje de notificación para el usuario
+        crear_mensaje(asunto, mensaje, id_usuario)
+        print(f"Mensaje enviado a {username} (ID: {id_usuario})")
+
+    conexion.commit()
+    conexion.close()
+    print("Notificación enviada a los usuarios sin datos.")
+
+# App Flask
 app = Flask(__name__)
 
 # Configuración de la clave secreta para usar flash
@@ -243,7 +300,7 @@ def gestion_usuarios():
     )
 
 # -- Rutas para manejar las acciones desde la Barras de Herramientas --
-# Rutas para actualizar datos de usuario
+# Ruta para actualizar los datos de cualquier usuario (sin importar nivel de acceso)
 @app.route("/actualizar/datos-usuario/<int:user_id>", methods=["GET", "POST"])
 def actualizar_datos_usuario(user_id):
     if 'username' not in session:
@@ -334,24 +391,24 @@ def obtener_mensajes(usuario_id):
         conexion = sqlite3.connect('BD/usuarios.db')
         cursor = conexion.cursor()
 
-        # Obtener mensajes de difusión y específicos no leídos
+        # Obtener mensajes no entregados para este usuario
         cursor.execute('''
         SELECT id, asunto, mensaje, fecha_envio
         FROM mensajes
-        WHERE (usuario_id IS NULL OR usuario_id = ?) AND fecha_entregado IS NULL
+        WHERE usuario_id = ? AND fecha_entregado IS NULL
         ''', (usuario_id,))
         mensajes = cursor.fetchall()
 
         print("Mensajes obtenidos:", mensajes)  # Depuración
 
-        # Marcar como leídos (registrar fecha_entregado)
+        # Registrar fecha de entrega
         fecha_entregado = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         if mensajes:
-            print("Marcando como entregados los mensajes con IDs:", [mensaje[0] for mensaje in mensajes])
             cursor.executemany(
                 'UPDATE mensajes SET fecha_entregado = ? WHERE id = ?',
                 [(fecha_entregado, mensaje[0]) for mensaje in mensajes]
             )
+
         conexion.commit()
         conexion.close()
 
@@ -361,7 +418,95 @@ def obtener_mensajes(usuario_id):
             for mensaje in mensajes
         ])
     except Exception as e:
-        print("Error al obtener mensajes:", e)  # Depuración
+        print("Error al obtener mensajes:", e)
+        return jsonify({"error": "Error interno del servidor"}), 500
+
+# Rutas para envios de mensajes
+@app.route("/enviar-mensaje/<string:tipo>", methods=["GET", "POST"])
+@app.route("/enviar-mensaje/<string:tipo>/<int:usuario_id>", methods=["GET", "POST"])
+def enviar_mensaje(tipo, usuario_id=None):
+    """
+    Renderiza el formulario para enviar un mensaje.
+    - tipo: "individual" o "difusion".
+    - usuario_id: Solo aplica para mensajes individuales.
+    """
+    if 'username' not in session:
+        flash("Inicia sesión para continuar.", "error")
+        return redirect(url_for("login"))
+
+    if request.method == "POST":
+        asunto = request.form["asunto"]
+        mensaje = request.form["mensaje"]
+
+        if tipo == "individual" and usuario_id:
+            # Crear un mensaje individual
+            crear_mensaje(asunto, mensaje, usuario_id)
+        elif tipo == "difusion":
+            # Crear mensajes para todos los usuarios
+            crear_mensaje(asunto, mensaje)
+        else:
+            flash("Error: Tipo de mensaje inválido.", "error")
+            return redirect(request.url)
+
+        flash("Mensaje enviado correctamente.", "success")
+        return redirect(url_for("gestion_usuarios"))
+
+    # Preparar datos para el formulario
+    destinatario = None
+    if tipo == "individual" and usuario_id:
+        conexion = sqlite3.connect('BD/usuarios.db')
+        cursor = conexion.cursor()
+        cursor.execute("SELECT username FROM usuarios WHERE id = ?", (usuario_id,))
+        usuario = cursor.fetchone()
+        conexion.close()
+
+        if usuario:
+            destinatario = usuario[0]
+        else:
+            flash("Usuario no encontrado.", "error")
+            return redirect(url_for("gestion_usuarios"))
+
+    return render_template(
+        "enviar_mensaje.html",
+        tipo=tipo,
+        destinatario=destinatario
+    )
+
+# Rutas para notificar usuarios
+@app.route("/notificar-usuarios-sin-datos", methods=["POST"])
+def notificar_usuarios_sin_datos():
+    try:
+        # Conectar a la base de datos
+        conexion = sqlite3.connect('BD/usuarios.db')
+        cursor = conexion.cursor()
+
+        # Buscar usuarios con datos faltantes
+        cursor.execute('''
+            SELECT id, username 
+            FROM usuarios 
+            WHERE telefono IS NULL OR telefono = '' OR correo IS NULL OR correo = ''
+        ''')
+        usuarios_faltantes = cursor.fetchall()
+
+        # Crear un mensaje si no hay faltantes
+        if not usuarios_faltantes:
+            return jsonify({"message": "No hay usuarios con datos faltantes."}), 200
+
+        # Crear un mensaje para cada usuario con datos faltantes
+        for usuario_id, username in usuarios_faltantes:
+            crear_mensaje(
+                asunto="Actualización de Datos Requerida",
+                mensaje=f"Hola {username}, por favor actualiza tu información de contacto.",
+                usuario_id=usuario_id
+            )
+
+        conexion.close()
+
+        # Retornar éxito
+        return jsonify({"message": "Notificaciones enviadas correctamente", "usuarios_notificados": len(usuarios_faltantes)}), 200
+
+    except Exception as e:
+        print("Error al notificar usuarios sin datos:", e)
         return jsonify({"error": "Error interno del servidor"}), 500
 
 # Llamar a la función para inicializar la base de datos

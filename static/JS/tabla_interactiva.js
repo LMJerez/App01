@@ -34,6 +34,7 @@ const TableManager = (() => {
 
     // Exponer las funciones necesarias
     return {
+        toggleSelection,
         getSelectedId,
     };
 })();

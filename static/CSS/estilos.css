@@ -72,6 +72,20 @@ select:focus {
     box-shadow: 0 0 8px rgba(76, 175, 80, 0.5); /* Efecto al enfocar */
 }
 
+textarea {
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+    resize: vertical;
+}
+
+textarea:focus {
+    border-color: #4CAF50;
+    outline: none;
+}
+
 /* Botón de submit */
 button[type="submit"] {
     width: 100%;
@@ -87,6 +101,7 @@ button[type="submit"] {
 
 button[type="submit"]:hover {
     background-color: #45a049;
+    border: none;
     transform: translateY(-2px);
 }
 
@@ -110,6 +125,7 @@ button#toggle-password {
 
 button#toggle-password:hover {
     color: #4CAF50;
+    border: none;
     transform: translateY(-2px);
 }
 
@@ -413,17 +429,20 @@ tr:hover {
 /* Botón guardar */
 .form-buttons button {
     background-color: #4CAF50;
+    border: none;
     color: white;
 }
 
 .form-buttons button:hover {
     background-color: #45a049;
+    border: none;
     transform: translateY(-2px);
 }
 
 /* Botón volver */
 .form-buttons .button {
     background-color: #e2980d; /* Rojo */
+    border: none;
     color: white;
     text-decoration: none; /* Quitar subrayado */
     text-align: center;
@@ -431,6 +450,7 @@ tr:hover {
 
 .form-buttons .button:hover {
     background-color: #c4830b; /* Rojo más oscuro */
+    border: none;
     transform: translateY(-2px);
 }
 
@@ -461,52 +481,55 @@ dialog select:focus {
 
 /* - NOTIFICACIONES - */
 /* Mensajes flotantes */
-.mensaje-dialog {
-    border: none;
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-    padding: 20px;
-    width: 300px;
-    max-width: 90%;
-    background-color: #fff;
-    position: fixed;
-    top: 20px;
-    right: 20px;
+dialog.mensaje {
+    width: 380px;            
     z-index: 1000;
     animation: fadeIn 0.5s ease-in-out;
 }
 
-.mensaje-dialog h3 {
-    margin: 0 0 10px 0;
-    font-size: 1.2rem;
-    color: #333;
+/* Contenedor del contenido del mensaje */
+.mensaje {
+    display: flex;
+    flex-direction: column; /* Alinear los elementos en columna */
+    align-items: center; /* Centrar horizontalmente los elementos */
+    justify-content: center; /* Centrar verticalmente (si fuera necesario) */
+    gap: 10px; /* Espaciado entre los elementos */
 }
 
-.mensaje-dialog p {
-    font-size: 1rem;
-    margin: 0 0 20px 0;
-    color: #666;
+/* Estilo para la imagen */
+.mensaje img {
+    width: 60px; /* Ancho de la imagen */
+    height: auto; /* Mantener proporción */
+    margin-bottom: 10px; /* Espaciado inferior */
 }
 
-.mensaje-dialog button {
-    padding: 8px 15px;
-    font-size: 1rem;
+/* Botones dentro del diálogo */
+.close-dialog {
+    width: auto;
+    padding: 12px;
     background-color: #4CAF50;
     color: white;
     border: none;
     border-radius: 5px;
+    font-size: 1rem;
     cursor: pointer;
+    transition: background-color 0.3s ease;    
 }
 
-.mensaje-dialog button:hover {
+.close-dialog:hover {
     background-color: #45a049;
+    transform: translateY(-2px);
+}
+
+.close-dialog:focus {
+    outline: none;
 }
 
 /* Animación para el mensaje */
 @keyframes fadeIn {
     from {
         opacity: 0;
-        transform: translateY(-20px);
+        transform: translateY(-10px);
     }
     to {
         opacity: 1;

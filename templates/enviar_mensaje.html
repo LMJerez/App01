@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enviar Mensaje</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='CSS/estilos.css') }}">
+</head>
+<body>
+    <h2>Enviar Mensaje</h2>
+    <form method="POST">
+        <!-- Campo para asunto -->
+        <label for="asunto">Asunto:</label>
+        <input type="text" name="asunto" id="asunto" required><br>
+
+        <!-- Campo para contenido del mensaje -->
+        <label for="mensaje">Mensaje:</label>
+        <textarea name="mensaje" id="mensaje" rows="5" required></textarea><br>
+
+        <!-- Mostrar destinatario si es un mensaje individual -->
+        {% if tipo == "individual" %}
+            <label for="destinatario">Destinatario:</label>
+            <input type="text" id="destinatario" value="{{ destinatario }}" readonly><br>
+        {% endif %}
+
+        <!-- Botones -->
+        <div class="form-buttons">
+            <button type="submit">Enviar Mensaje</button>
+            <a href="{{ url_for('gestion_usuarios') }}" class="button naranja">Volver</a>
+        </div>
+    </form>
+</body>
+</html>

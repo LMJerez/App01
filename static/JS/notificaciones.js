@@ -29,13 +29,22 @@ document.addEventListener("DOMContentLoaded", () => {
  */
 function mostrarMensaje(asunto, texto, fechaEnvio) {
     const dialog = document.createElement("dialog");
-    dialog.classList.add("mensaje-dialog");
+    dialog.classList.add("mensaje");
     dialog.innerHTML = `
-        <h3>${asunto}</h3>
-        <p><strong>Enviado:</strong> ${new Date(fechaEnvio).toLocaleString()}</p>
+        <img src="/static/images/logos/logo-msg.png" alt="Mensaje">
+        <h2>Mensaje</h2>        
+        <h3>Asunto: ${asunto}</h3>        
         <p>${texto}</p>
-        <button onclick="this.parentElement.close()">Cerrar</button>
+        <p>Fecha: ${new Date(fechaEnvio).toLocaleString()}</p>        
+        <button class="close-dialog">Cerrar</button>        
     `;
-    document.body.appendChild(dialog);
+    document.body.appendChild(dialog);    
+    // Mostrar el diálogo
     dialog.show();
+    // Añadir el evento al botón de cierre
+    dialog.querySelector(".close-dialog").addEventListener("click", () => {
+        dialog.close(); // Cierra el diálogo
+        dialog.remove(); // Elimina el diálogo del DOM
+    });
 }
+

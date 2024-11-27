@@ -78,3 +78,36 @@ function updateAccessLevel() {
         dialog.remove();
     });
 }
+
+/**
+ * Redirigir al formulario de mensajes individuales según el usuario seleccionado.
+ */
+function messageToUser() {
+    const userId = TableManager.getSelectedId();
+    if (!userId) {
+        alert("Selecciona un usuario de la tabla.");
+        return;
+    }
+    window.location.href = `/enviar-mensaje/individual/${userId}`;
+}
+
+/**
+ * Redirigir a la ruta notificacr usuarios sin datos.
+ */
+function notificarUsuariosSinDatos() {
+    console.log("Verificando usuarios sin datos...");
+
+    fetch("/notificar-usuarios-sin-datos", {
+        method: "POST",
+    })
+        .then(response => response.json())
+        .then(data => {
+            const totalNotificaciones = data.usuarios_notificados || 0;
+            alert(`Notificaciones enviadas correctamente: ${totalNotificaciones} usuarios notificados.`);
+            console.log("Respuesta del servidor:", data);
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            alert("Ocurrió un error al enviar notificaciones.");
+        });
+}
