@@ -63,6 +63,12 @@
     <!-- Archivo para manejar la tabla -->
     <script src="{{ url_for('static', filename='JS/tabla_interactiva.js') }}"></script>
     <!-- Archivo para manejar la barra de herramientas depende de tabla_interactiva-->
-    <script src="{{ url_for('static', filename='JS/toolbar_actions.js') }}"></script>    
+    <script src="{{ url_for('static', filename='JS/toolbar_actions.js') }}"></script>
+    <!-- scrip para gestionar la pagina de origen de editar usuario -->
+    <script src="{{ url_for('static', filename='JS/origen.js') }}"></script>
+    <script src="{{ url_for('static', filename='JS/origen.js') }}"></script>
+    <script>
+        setOrigenFormulario("gestion_usuarios");
+    </script>
 </body>
 </html>
