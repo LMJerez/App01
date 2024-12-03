@@ -16,8 +16,8 @@ def inicializar_bd():
         username TEXT UNIQUE NOT NULL,
         password TEXT NOT NULL,        
         nivel_acceso INTEGER DEFAULT 1,
-        telefono TEXT,
-        correo TEXT,
+        telefono TEXT NOT NULL, 
+        correo TEXT NOT NULL,
         password_last_updated TEXT
     )
     ''')
@@ -41,7 +41,12 @@ def inicializar_bd():
 
     print("Base de datos inicializada correctamente.")
 
-def registrar_usuario(username, password):
+#Registrar Usuario
+def registrar_usuario(username, password, telefono, correo):
+        
+    #Validar datos
+    if not username or not password or not telefono or not correo:
+        return "El teléfono y el correo son obligatorios."
     # Validar la contraseña
     if not validar_contrasena(password):
         return "La contraseña debe tener al menos 6 caracteres, una mayúscula, una minúscula y un número."
@@ -59,17 +64,19 @@ def registrar_usuario(username, password):
     # Insertar el usuario en la base de datos
     try:
         cursor.execute('''
-            INSERT INTO usuarios (username, password, password_last_updated)
-            VALUES (?, ?, ?)''', (username, hashed_password, fecha_actualizacion))
+            INSERT INTO usuarios (username, password, telefono, correo, password_last_updated)
+            VALUES (?, ?, ?, ?, ?)
+        ''', (username, hashed_password, telefono, correo, datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
         conexion.commit()
-        print("Usuario registrado exitosamente.")
+        print("Usuario registrado exitosamente: ", username)
         return None  # No hay error, todo está bien
     except sqlite3.IntegrityError:
-        print("Error: El usuario ya existe.")
+        print("Error: El usuario ya existe:", username)
         return "El usuario ya existe."
     finally:
         conexion.close()
 
+#Validar usuario
 def validar_usuario(username, password):
     print(f"Validando usuario: {username}")  # Depuración
 
@@ -96,6 +103,7 @@ def validar_usuario(username, password):
 
     return None
 
+#Validar contraseña
 # Función de validación de la contraseña
 def validar_contrasena(password):
     # Expresión regular para validar la contraseña
@@ -173,6 +181,7 @@ def notificar_usuarios_sin_datos():
     conexion.close()
     print("Notificación enviada a los usuarios sin datos.")
 
+#---FLASK---
 # App Flask
 app = Flask(__name__)
 
@@ -211,6 +220,7 @@ def login():
 
     return render_template("login.html")
 
+#Cerrar Ruta Cerrar sesion
 @app.route("/logout")
 def logout():
     session.pop('username', None)
@@ -224,12 +234,14 @@ def register():
     if request.method == "POST":
         username = request.form["username"]
         password = request.form["password"]
-        error = registrar_usuario(username, password)
+        telefono = request.form["telefono"]
+        correo = request.form["correo"]
         
+        error = registrar_usuario(username, password, telefono, correo)        
         if error:
             flash(error, 'error')  # Usamos flash para mostrar el mensaje en la página
         else:
-            flash("Usuario registrado exitosamente.", 'success')
+            flash("Usuario registrado exitosamente. Por favor, inicia sesión.", 'success')
             return redirect(url_for("login"))
     
     return render_template("register.html")
@@ -237,81 +249,109 @@ def register():
 # Ruta para manejar la página principal después de iniciar sesión
 @app.route("/index")
 def index():
-    # Validar que el usuario tenga sesión iniciada
     if 'username' not in session:
-        print("Sesión no encontrada. Redirigiendo al login.")  # Depuración
         flash("Inicia sesión para continuar.", "error")
         return redirect(url_for("login"))
 
-    # Obtener las variables 'username' y 'nivel_acceso' desde la sesión
     username = session['username']
-    nivel_acceso = session.get('nivel_acceso', 1)  # Usar el nivel de acceso almacenado o por defecto 1
-    print(f"Sesión activa: Usuario: {username}, Nivel de acceso: {nivel_acceso}")  # Depuración
+    nivel_acceso = session.get('nivel_acceso', 1)
+    user_id = session['user_id']
 
-    return render_template("index.html", username=username, nivel_acceso=nivel_acceso)
+    # Verificar si el usuario tiene datos incompletos
+    conexion = sqlite3.connect('BD/usuarios.db')
+    cursor = conexion.cursor()
+    cursor.execute("SELECT telefono, correo FROM usuarios WHERE id = ?", (user_id,))
+    datos_usuario = cursor.fetchone()
+    conexion.close()
+
+    # Determinar si los datos están incompletos
+    datos_incompletos = not datos_usuario or not all(datos_usuario)
+
+    return render_template(
+        "index.html",
+        username=username,
+        nivel_acceso=nivel_acceso,
+        user_id=user_id,
+        datos_incompletos=datos_incompletos  # Enviar este indicador a la plantilla
+    )
 
 # Ruta para la administracion de ususarios
 @app.route("/gestion-usuarios")
 def gestion_usuarios():
-    # Verificar si el usuario está autenticado
     if 'username' not in session:
         flash("Por favor, inicia sesión primero.", "error")
         return redirect(url_for('login'))
     
-    username = session['username']    
-    # Verificar el nivel de acceso antes de mostrar el contenido
+    username = session['username']
     nivel_acceso = session.get('nivel_acceso', 1)
 
     if nivel_acceso < 3:
         flash("No tienes permiso para acceder a esta página.", "error")
         return redirect(url_for('index'))
-    
-    # Obtener los datos de los usuarios
-    conexion = sqlite3.connect('BD/usuarios.db')
-    cursor = conexion.cursor()
 
+    return render_template(
+        "gestion_usuarios.html",
+        username=username,
+        nivel_acceso=nivel_acceso
+    )
+
+#Ruta para crear un nuevo endpoint para devolver los datos en formato JSON:
+@app.route("/api/usuarios", methods=["GET"])
+def api_usuarios():
+    if 'username' not in session:
+        return jsonify({"error": "No autorizado"}), 401
+
+    nivel_acceso = session.get("nivel_acceso", 1)
+    if nivel_acceso < 3:
+        return jsonify({"error": "No tienes permiso para acceder a esta página."}), 403
+
+    conexion = sqlite3.connect("BD/usuarios.db")
+    cursor = conexion.cursor()
     cursor.execute('''
         SELECT id, username, nivel_acceso, telefono, correo, password_last_updated
         FROM usuarios
         ORDER BY username ASC
     ''')
     usuarios = cursor.fetchall()
-
     conexion.close()
 
-    # Calcular el estado de la contraseña
     usuarios_estado = [
-        (
-            id, username, nivel_acceso, telefono, correo,
-            f"{'Actualizada' if actualizada else 'Desactualizada'} ({dias} días)"
-            if dias is not None else "Nunca actualizada"
-        )
+        {
+            "id": id,
+            "username": username,
+            "nivel_acceso": nivel_acceso,
+            "telefono": telefono,
+            "correo": correo,
+            "estado_contrasena": (
+                f"{'Actualizada' if actualizada else 'Desactualizada'} ({dias} días)"
+                if dias is not None else "Nunca actualizada"
+            )
+        }
         for id, username, nivel_acceso, telefono, correo, password_last_updated 
         in usuarios
         for actualizada, dias in [es_contrasena_actualizada(password_last_updated)]
     ]
 
-    # Pasar los datos de la base de datos y la sesión a la plantilla
-    return render_template(
-        "gestion_usuarios.html",
-        usuarios=usuarios_estado,
-        username=username,
-        nivel_acceso=nivel_acceso
-    )
+    return jsonify(usuarios_estado), 200
 
 # -- Rutas para manejar las acciones desde la Barras de Herramientas --
 # Ruta para actualizar los datos de cualquier usuario (sin importar nivel de acceso)
 @app.route("/actualizar/datos-usuario/<int:user_id>", methods=["GET", "POST"])
-def actualizar_datos_usuario(user_id):
-    if 'username' not in session:
-        flash("Por favor, inicia sesión primero.", "error")
-        return redirect(url_for('login'))
+def actualizar_datos_usuario(user_id):    
 
+    # Validar existencia del usuario en la base de datos
     conexion = sqlite3.connect('BD/usuarios.db')
     cursor = conexion.cursor()
+    cursor.execute('SELECT username, telefono, correo FROM usuarios WHERE id = ?', (user_id,))
+    usuario = cursor.fetchone()
+    conexion.close()
 
+    if not usuario:
+        flash("Usuario no encontrado.", "error")
+        return redirect(url_for('index'))  # Redirige a la página de origen
+
+    # Manejo de solicitud POST
     if request.method == "POST":
-        # Obtener los datos del formulario
         nuevo_nombre = request.form["username"]
         nuevo_telefono = request.form["telefono"]
         nuevo_correo = request.form["correo"]
@@ -322,13 +362,15 @@ def actualizar_datos_usuario(user_id):
         fecha_actualizacion = None
         if nueva_contrasena:  # Si se ingresa una nueva contraseña
             if not validar_contrasena(nueva_contrasena):
-                flash("La contraseña debe tener al menos 6 caracteres, una mayúscula, una minúscula y un número.", "error")
+                flash("La contraseña debe cumplir los requisitos mínimos.", "error")
                 return redirect(request.url)
 
             hashed_password = bcrypt.hashpw(nueva_contrasena.encode('utf-8'), bcrypt.gensalt())
             fecha_actualizacion = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
         # Actualizar los datos en la base de datos
+        conexion = sqlite3.connect('BD/usuarios.db')
+        cursor = conexion.cursor()
         if hashed_password and fecha_actualizacion:
             cursor.execute('''
                 UPDATE usuarios
@@ -346,18 +388,16 @@ def actualizar_datos_usuario(user_id):
         conexion.close()
 
         flash("Datos del usuario actualizados correctamente.", "success")
-        return redirect(url_for("gestion_usuarios"))
+        return redirect(url_for('index'))  # Redirige a la página de origen después de guardar
 
-    # Obtener los datos actuales del usuario
-    cursor.execute('SELECT username, telefono, correo FROM usuarios WHERE id = ?', (user_id,))
-    usuario = cursor.fetchone()
-    conexion.close()
-
-    if not usuario:
-        flash("Usuario no encontrado.", "error")
-        return redirect(url_for("gestion_usuarios"))
-
-    return render_template("editar_usuario.html", user_id=user_id, username=usuario[0], telefono=usuario[1], correo=usuario[2])
+    # Manejo de solicitud GET: Renderizar el formulario con los datos actuales
+    return render_template(
+        "editar_usuario.html",
+        user_id=user_id,
+        username=usuario[0],
+        telefono=usuario[1],
+        correo=usuario[2]
+    )
 
 # Rutas para actualizar nivel de acceso de usuario
 @app.route("/actualizar-nivel-acceso/<int:user_id>", methods=["POST"])

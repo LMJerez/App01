@@ -1,3 +1,25 @@
+function handleAction(action) {
+    const selectedId = TableManager.getSelectedId(); // Obtener el ID seleccionado
+    if (!selectedId) {
+        alert("Por favor, selecciona un usuario primero.");
+        return;
+    }
+
+    switch (action) {
+        case 'update':
+            window.location.href = `/actualizar/datos-usuario/${selectedId}`;
+            break;
+
+        case 'access':
+            console.log(`Cambiando nivel de acceso para el usuario con ID ${selectedId}`);
+            updateAccessLevel(selectedId);
+            break;
+
+        default:
+            console.error(`Acción desconocida: ${action}`);
+    }
+}
+
 /**
  * Redirige a la página de edición de usuario.
  */
@@ -7,8 +29,9 @@ function editUser() {
         alert("Selecciona un usuario de la tabla haciendo clic sobre su ID.");
         return;
     }
-    // Redirigir a la página de edición
-    window.location.href = `/actualizar/datos-usuario/${selectedId}`;
+    // Redirigir a la página de edición con el origen 'gestion_usuarios'
+    const next = "gestion_usuarios";
+    window.location.href = `/actualizar/datos-usuario/${selectedId}?next=${next}`;
     console.log(`ID seleccionado para editar: ${selectedId}`);
 }
 

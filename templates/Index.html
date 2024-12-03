@@ -6,7 +6,7 @@
     <title>App01</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='CSS/estilos.css') }}">
 </head>
-<body data-usuario-id="{{ session['user_id'] }}">
+<body data-datos-incompletos="{{ datos_incompletos | tojson }}" data-user-id="{{ user_id | tojson }}">
     <!-- Incluir el menú principal -->
     {% include 'menu_principal.html' %}
 
@@ -18,6 +18,8 @@
     <!-- Área donde se mostrarán los mensajes -->
     <div id="mensajes"></p></div>
 
+    <!-- Agregar el archivo de verificacion de parametro datos completos -->
+    <script src="{{ url_for('static', filename='JS/datos_incompletos.js') }}"></script>
     <!-- Agregar el archivo de notificaciones -->
     <script src="{{ url_for('static', filename='JS/notificaciones.js') }}"></script>
 </body>

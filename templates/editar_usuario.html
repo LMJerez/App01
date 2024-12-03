@@ -9,25 +9,25 @@
 <body>
     <h2>Editar Usuario</h2>
     <form method="POST">
-        <label for="username">Nombre:</label>
-        <input type="text" name="username" id="username" value="{{ username }}" required><br>
-    
-        <label for="telefono">Teléfono:</label>
-        <input type="text" name="telefono" id="telefono" value="{{ telefono }}" required><br>
-    
-        <label for="correo">Correo:</label>
-        <input type="email" name="correo" id="correo" value="{{ correo }}" required><br>
-    
-        <label for="password">Nueva Contraseña (Opcional):</label>
-        <div class="div-toggle-password">
+        <label for="username">Nombre de Usuario:</label>
+        <input type="text" name="username" id="username" value="{{ username }}" required><br><br>
+
+        <label for="password">Contraseña (opcional):</label>
+        <div class="toggle-password">
             <input type="password" name="password" id="password">
-            <button type="button" id="toggle-password">Mostrar</button>
-        </div><br>
+            <button type="button" id="toggle-password">Mostrar</button><br><br>
+        </div>
+
+        <label for="telefono">Teléfono:</label>
+        <input type="text" name="telefono" id="telefono" value="{{ telefono }}" required><br><br>
+
+        <label for="correo">Correo Electrónico:</label>
+        <input type="email" name="correo" id="correo" value="{{ correo }}" required><br><br>
         
         <!-- Botones -->
         <div class="form-buttons">
             <button type="submit">Guardar Cambios</button>
-            <a href="{{ url_for('gestion_usuarios') }}" class="button naranja">Volver</a>
+            <a href="{{ url_for('index') }}" class="button naranja">Volver</a>
         </div>
     </form>
 

@@ -372,28 +372,34 @@ tr:hover {
 
 /* Estilo base para las celdas de la columna ID */
 .id {
-    text-align: center; /* Centrar el contenido */
+    text-align: center;
     width: 5%;
     padding: 10px;
-    cursor: pointer; /* Apunta que es interactivo */
-    background-color: #f9f9f9; /* Fondo claro */
+    cursor: pointer;
+    background-color: #f9f9f9;
     border: 1px solid #ddd;
-    border-radius: 5px; /* Bordes redondeados */
-    transition: background-color 0.3s ease, transform 0.2s ease; /* Efectos suaves */
+    border-radius: 5px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 /* Hover: Cambiar apariencia al pasar el ratón */
 .id:hover {
-    background-color: #e0e0e0; /* Fondo más oscuro al pasar el ratón */
-    transform: scale(1.05); /* Ampliar ligeramente */
+    background-color: #d4edda;
+    transform: scale(1.05);
 }
 
-/* Estado seleccionado */
-.id.selected {
+/* Estado seleccionado: Prioridad para la celda ID */
+tr.selected .id {
     background-color: #4CAF50; /* Fondo verde */
     color: white; /* Texto blanco */
     border-color: #45a049; /* Bordes verdes */
-    transform: scale(1); /* Tamaño normal al estar seleccionado */
+    transform: scale(1); /* Tamaño normal */
+}
+
+/* Estado seleccionado de la fila */
+tr.selected {
+    background-color: #d4edda; /* Verde claro */
+    font-weight: bold;
 }
 
 /* Estilo base para las celdas de la columna password */

@@ -19,28 +19,22 @@
     <!-- Barra de herramientas -->
     <nav class="toolbar">
         <ul>
-            <!-- Submenú para Actualizar datos -->
+            <!-- Acciones sobre usuarios seleccionados -->
             <li class="dropdown">
-                <a href="#" class="dropbtn">Actualizar</a>
+                <a href="#" class="dropbtn">Acciones por Usuario</a>
                 <div class="dropdown-content">
-                    <a href="#" onclick="editUser()">Datos de usuario</a>
-                    <a href="#" onclick="updateAccessLevel()">Nivel de acceso usuario</a>
+                    <a href="#" onclick="handleAction('update')">Actualizar datos</a>
+                    <a href="#" onclick="handleAction('access')">Cambiar nivel de acceso</a>
+                </div>
+            </li>
+        
+            <!-- Acciones globales -->
+            <li class="dropdown">
+                <a href="#" class="dropbtn">Acciones Globales</a>
+                <div class="dropdown-content">
                     <a href="#" onclick="notificarUsuariosSinDatos()">Notificar usuarios sin datos</a>
-                </div>
-            </li>
-            <!-- Submenú para Enviar Mensajes -->
-            <li class="dropdown">
-                <a href="#" class="dropbtn">Mensajes</a>
-                <div class="dropdown-content">
-                    <a href="#" onclick="messageToUser()">Individual</a>
-                    <a href="/enviar-mensaje/difusion">Difusión</a>
-                </div>
-            </li>
-            <!-- Submenú para Seguridad -->
-            <li class="dropdown">
-                <a href="#" class="dropbtn">Seguridad</a>
-                <div class="dropdown-content">
-                    <a href="#" onclick="ReportOutdatedPasswords()">Notificar contraseñas desactualizadas</a>                    
+                    <a href="/enviar-mensaje/difusion">Enviar mensaje de difusión</a>
+                    <a href="#" onclick="ReportOutdatedPasswords()">Notificar contraseñas desactualizadas</a>
                 </div>
             </li>
         </ul>
@@ -51,29 +45,23 @@
         <thead>
             <tr>
                 <th class="id">ID</th>
-                <th>Nombre de Usuario</th>                
+                <th>Nombre</th>
                 <th>Nivel de Acceso</th>
                 <th>Teléfono</th>
-                <th>Correo Electrónico</th>
-                <th>Estado de Contraseña</th>
+                <th>Correo</th>
+                <th>Estado Contraseña</th>
             </tr>
         </thead>
-        <tbody>
-            {% for usuario in usuarios %}
-                <tr data-id="{{ usuario[0] }}">
-                    <td class="id" onclick="TableManager.toggleSelection(this)">{{ usuario[0] }}</td>
-                    <td>{{ usuario[1] }}</td> <!-- Nombre usuario -->
-                    <td>{{ usuario[2] }}</td> <!-- Nivel acceso -->
-                    <td>{{ usuario[3] }}</td> <!-- Telefono -->
-                    <td>{{ usuario[4] }}</td> <!-- Correo electronico -->
-                    <td>{{ usuario[5] }}</td> <!-- Estado de Contraseña -->
-                </tr>
-            {% endfor %}
+        <tbody id="usuarios-tbody">
+            <!-- Las filas se generarán dinámicamente -->
         </tbody>
     </table>
+
+    <!-- Archivo para cargar los datos de usuarios -->
+    <script src="{{ url_for('static', filename='JS/cargar_usuarios.js') }}"></script>
     <!-- Archivo para manejar la tabla -->
     <script src="{{ url_for('static', filename='JS/tabla_interactiva.js') }}"></script>
     <!-- Archivo para manejar la barra de herramientas depende de tabla_interactiva-->
-    <script src="{{ url_for('static', filename='JS/toolbar_actions.js') }}"></script>
+    <script src="{{ url_for('static', filename='JS/toolbar_actions.js') }}"></script>    
 </body>
 </html>

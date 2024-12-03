@@ -1,3 +1,4 @@
+{{ url_for('actualizar_datos_usuario', user_id=session.user_id, next='index') }}
 <nav>
     <ul>
         <li><a href="{{ url_for('index', username=username, nivel_acceso=nivel_acceso) }}">Inicio</a></li>
@@ -19,8 +20,8 @@
             <!-- Nueva sección: Usuario -->
             <li class="dropdown">
                 <a href="#" class="dropbtn">Usuario</a>
-                <div class="dropdown-content">
-                    <a href="{{ url_for('actualizar_datos_usuario', user_id=session.user_id) }}">Actualizar datos</a>
+                <div class="dropdown-content">                    
+                    <a href="{{ url_for('actualizar_datos_usuario', user_id=session.user_id) }}">Actualizar datos</a>                    
                     {% if session.username %}
                         <a href="{{ url_for('logout') }}">Cerrar sesión</a>
                     {% else %}
