@@ -1,3 +1,4 @@
+// --> Funciónes para Usuarios
 function handleAction(action) {
     const selectedId = TableManager.getSelectedId(); // Obtener el ID seleccionado
     if (!selectedId) {
@@ -133,4 +134,42 @@ function notificarUsuariosSinDatos() {
             console.error("Error:", error);
             alert("Ocurrió un error al enviar notificaciones.");
         });
+}
+
+// --> Funciónes para Cargos
+function handleCargoAction(action) {
+    const selectedCargoId = TableManager.getSelectedId(); // Obtener el ID del cargo seleccionado
+    if (!selectedCargoId) {
+        alert("Por favor, selecciona un cargo primero.");
+        return;
+    }
+
+    switch (action) {
+        case 'edit':
+            window.location.href = `/editar/cargo/${selectedCargoId}`;
+            break;
+
+        case 'remove':
+            if (confirm("¿Estás seguro de que deseas eliminar este cargo?")) {
+                removeCargo(selectedCargoId);
+            }
+            break;
+
+        default:
+            console.error(`Acción desconocida: ${action}`);
+    }
+}
+
+async function removeCargo(cargoId) {
+    try {
+        const response = await fetch(`/api/cargos/${cargoId}`, { method: "DELETE" });
+        if (!response.ok) {
+            throw new Error(`Error al eliminar cargo: ${response.statusText}`);
+        }
+        alert("Cargo eliminado con éxito.");
+        const usuarioId = TableManager.getSelectedId(); // ID del usuario actual
+        if (usuarioId) cargarCargos(usuarioId); // Recargar cargos del usuario
+    } catch (error) {
+        console.error("Error eliminando cargo:", error);
+    }
 }

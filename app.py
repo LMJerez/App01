@@ -590,6 +590,25 @@ def notificar_usuarios_sin_datos():
     except Exception as e:
         print("Error al notificar usuarios sin datos:", e)
         return jsonify({"error": "Error interno del servidor"}), 500
+    
+@app.route('/api/cargos/<int:usuario_id>')
+def obtener_cargos_usuario(usuario_id):
+    conexion = sqlite3.connect('BD/usuarios.db')
+    cursor = conexion.cursor()
+
+    # Incluir el ID del cargo en la consulta
+    cursor.execute('''
+        SELECT cargos.id AS cargo_id, cargos.nombre AS cargo, areas_organizacionales.nombre AS area
+        FROM usuarios_cargos
+        JOIN cargos ON usuarios_cargos.cargo_id = cargos.id
+        JOIN areas_organizacionales ON cargos.area_id = areas_organizacionales.id
+        WHERE usuarios_cargos.usuario_id = ?
+    ''', (usuario_id,))
+
+    # Convertir los resultados en un formato JSON
+    cargos = [{"id": fila[0], "cargo": fila[1], "area": fila[2]} for fila in cursor.fetchall()]
+    conexion.close()
+    return jsonify(cargos)
 
 # Llamar a la función para inicializar la base de datos
 if __name__ == "__main__":

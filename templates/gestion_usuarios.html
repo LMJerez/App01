@@ -41,22 +41,43 @@
         </ul>
     </nav>
 
-    <!-- Tabla de datos -->
-    <table>
-        <thead>
-            <tr>
-                <th class="id">ID</th>
-                <th>Nombre</th>
-                <th>Nivel de Acceso</th>
-                <th>Teléfono</th>
-                <th>Correo</th>
-                <th>Estado Contraseña</th>
-            </tr>
-        </thead>
-        <tbody id="usuarios-tbody">
-            <!-- Las filas se generarán dinámicamente -->
-        </tbody>
-    </table>
+    <div class="dos_tablas">        
+        <div class="primera_tabla">
+            <!-- Tabla de datos usuarios -->
+            <h4>Datos de Usuarios </h4>            
+            <table>
+                <thead>
+                    <tr>
+                        <th class="id">ID</th>
+                        <th>Nombre</th>
+                        <th>Acceso</th>
+                        <th>Teléfono</th>
+                        <th>Correo</th>
+                        <th>Estado Contraseña</th>
+                    </tr>
+                </thead>
+                <tbody id="usuarios-tbody">
+                    <!-- Las filas se generarán dinámicamente -->
+                </tbody>
+            </table>
+        </div class="segunda_tabla">
+        <div>
+            <!-- Tabla de cargos -->
+            <h4>Cargos del Usuario Seleccionado</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th class="id">ID</th>
+                        <th>Cargo</th>
+                        <th>Área Organizacional</th>
+                    </tr>
+                </thead>
+                <tbody id="cargos-tbody">
+                    <!-- Los datos se llenarán dinámicamente -->
+                </tbody>
+            </table>
+        </div>
+    </div>
 
     <!-- Archivo para cargar los datos de usuarios -->
     <script src="{{ url_for('static', filename='JS/cargar_usuarios.js') }}"></script>

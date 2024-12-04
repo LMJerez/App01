@@ -1,3 +1,4 @@
+// Función para cargar la tabla de usuarios
 async function cargarUsuarios() {
     try {
         const response = await fetch("/api/usuarios");
@@ -24,17 +25,17 @@ async function cargarUsuarios() {
 
             // Agregar manejador de clic para seleccionar/deseleccionar fila
             fila.addEventListener("click", () => {
-                if (fila.classList.contains("selected")) {
-                    // Si ya está seleccionada, deseleccionar
-                    fila.classList.remove("selected");
-                    TableManager.clearSelection(); // Limpiar el ID seleccionado
-                } else {
-                    // Deseleccionar cualquier fila previamente seleccionada
-                    document.querySelectorAll("tr.selected").forEach(row => row.classList.remove("selected"));
-                    
-                    // Marcar la fila actual como seleccionada
-                    fila.classList.add("selected");
-                    TableManager.toggleSelection(fila.querySelector(".id"));
+                // Deseleccionar cualquier fila previamente seleccionada
+                document.querySelectorAll("tr.selected").forEach(row => row.classList.remove("selected"));
+
+                // Marcar la fila actual como seleccionada
+                fila.classList.add("selected");
+                TableManager.toggleSelection(fila.querySelector(".id"));
+
+                // Cargar cargos del usuario seleccionado
+                const usuarioId = TableManager.getSelectedId();
+                if (usuarioId) {
+                    cargarCargos(usuarioId);
                 }
             });
 
@@ -46,4 +47,50 @@ async function cargarUsuarios() {
     }
 }
 
+// Función para cargar la tabla de cargos
+async function cargarCargos(usuarioId) {
+    try {
+        const response = await fetch(`/api/cargos/${usuarioId}`);
+        if (!response.ok) {
+            throw new Error(`Error al obtener cargos: ${response.statusText}`);
+        }
+
+        const cargos = await response.json();
+        const tbody = document.getElementById("cargos-tbody");
+        tbody.innerHTML = ""; // Limpiar la tabla de cargos
+
+        cargos.forEach(cargo => {
+            const fila = document.createElement("tr");
+
+            // Crear celdas para la fila, incluyendo el ID del cargo
+            fila.innerHTML = `
+                <td class="id">${cargo.id}</td>
+                <td>${cargo.cargo}</td>
+                <td>${cargo.area}</td>
+            `;
+
+            // Agregar funcionalidad de selección
+            fila.addEventListener("click", () => {
+                if (fila.classList.contains("selected")) {
+                    // Si la fila ya está seleccionada, deseleccionarla
+                    fila.classList.remove("selected");
+                    TableManager.clearSelection(); // Limpiar selección
+                } else {
+                    // Deseleccionar cualquier fila previamente seleccionada
+                    document.querySelectorAll("#cargos-tbody tr.selected").forEach(row => row.classList.remove("selected"));
+                    
+                    // Marcar la fila actual como seleccionada
+                    fila.classList.add("selected");
+                    TableManager.toggleSelection(fila.querySelector(".id"));
+                }
+            });
+
+            tbody.appendChild(fila);
+        });
+    } catch (error) {
+        console.error("Error cargando los cargos:", error);
+    }
+}
+
+// Cargar usuarios al cargar la página
 document.addEventListener("DOMContentLoaded", cargarUsuarios);

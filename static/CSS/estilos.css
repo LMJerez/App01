@@ -370,6 +370,27 @@ tr:hover {
 
 /* Estilos específicos por contenido */
 
+/* Dos tablas horizontales
+/* Contenedor principal para las tablas */
+.dos_tablas {
+    display: flex; /* Utilizar flexbox para alinear las tablas */
+    gap: 20px; /* Espacio entre las tablas */
+    margin-top: 20px; /* Separación del contenido superior */
+    flex-wrap: wrap; /* Permitir que se ajusten en pantallas pequeñas */
+}
+
+/* Primera tabla: Usuarios */
+.primera_tabla {
+    flex: 7; /* Ocupa el 70% del espacio disponible */
+    max-width: 70%; /* Limitar ancho máximo */
+}
+
+/* Segunda tabla: Cargos */
+.segunda_tabla {
+    flex: 3; /* Ocupa el 30% del espacio disponible */
+    max-width: 30%; /* Limitar ancho máximo */
+}
+
 /* Estilo base para las celdas de la columna ID */
 .id {
     text-align: center;
@@ -553,6 +574,13 @@ dialog.mensaje {
     nav ul {
         flex-direction: column; /* Cambia a disposición vertical */
         align-items: center;
+    }
+    .dos_tablas {
+        flex-direction: column; /* Apilar las tablas verticalmente */
+    }
+    .primera_tabla, .segunda_tabla {
+        max-width: 100%; /* Ocupan todo el ancho */
+        flex: 1; /* Ajustar proporción */
     }
 }
 
