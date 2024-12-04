@@ -9,6 +9,7 @@ def inicializar_bd():
     conexion = sqlite3.connect('BD/usuarios.db')
     cursor = conexion.cursor()
 
+    #TABLAS PRINCIPALES
     # Crear tabla de usuarios si no existe
     cursor.execute(''' 
     CREATE TABLE IF NOT EXISTS usuarios (
@@ -22,6 +23,47 @@ def inicializar_bd():
     )
     ''')
 
+     # Tabla de áreas organizacionales
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS areas_organizacionales (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        nombre TEXT UNIQUE NOT NULL
+    )
+    ''')
+
+    # Tabla de cargos
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS cargos (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        nombre TEXT UNIQUE NOT NULL,
+        area_id INTEGER NOT NULL,
+        FOREIGN KEY (area_id) REFERENCES areas_organizacionales(id)
+    )
+    ''')
+
+    # Tabla intermedia entre usuarios y cargos
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS usuarios_cargos (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        usuario_id INTEGER NOT NULL,
+        cargo_id INTEGER NOT NULL,
+        FOREIGN KEY (usuario_id) REFERENCES usuarios(id),
+        FOREIGN KEY (cargo_id) REFERENCES cargos(id)
+    )
+    ''')
+
+    # Tabla de relaciones jerárquicas entre cargos
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS relaciones_cargos (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        cargo_id INTEGER NOT NULL,
+        cargo_superior_id INTEGER NOT NULL,
+        FOREIGN KEY (cargo_id) REFERENCES cargos(id),
+        FOREIGN KEY (cargo_superior_id) REFERENCES cargos(id)
+    )
+    ''')
+
+    # TABLAS ADICIONALES
     # Crear tabla de mensajes
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS mensajes (

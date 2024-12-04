@@ -36,17 +36,8 @@
     <!-- scrip para gestionar la pagina de origen de editar usuario -->
     <script src="{{ url_for('static', filename='JS/origen.js') }}"></script>
     <script>
-        // Ajustar el enlace de "Volver" según el origen
         document.addEventListener("DOMContentLoaded", () => {
-            const volverEnlace = document.getElementById("volver");
-            const origenFormulario = getOrigenFormulario();
-
-            if (origenFormulario === "gestion_usuarios") {
-                volverEnlace.href = "/gestion-usuarios";
-            } else {
-                volverEnlace.href = "/";
-            }
-            console.log(`Enlace de 'Volver' ajustado a: ${volverEnlace.href}`);
+            adjustReturnLink("volver");
         });
     </script>
 </body>
