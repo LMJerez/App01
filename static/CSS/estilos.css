@@ -468,7 +468,7 @@ tr.selected {
 
 /* Botón volver */
 .form-buttons .button {
-    background-color: #e2980d; /* Rojo */
+    background-color: #e2980d; /* Naranja */
     border: none;
     color: white;
     text-decoration: none; /* Quitar subrayado */
@@ -476,7 +476,7 @@ tr.selected {
 }
 
 .form-buttons .button:hover {
-    background-color: #c4830b; /* Rojo más oscuro */
+    background-color: #c4830b; /* Naranja más oscuro */
     border: none;
     transform: translateY(-2px);
 }

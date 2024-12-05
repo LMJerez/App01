@@ -590,7 +590,8 @@ def notificar_usuarios_sin_datos():
     except Exception as e:
         print("Error al notificar usuarios sin datos:", e)
         return jsonify({"error": "Error interno del servidor"}), 500
-    
+
+#Rutas para Cargos de Usuario    
 @app.route('/api/cargos/<int:usuario_id>')
 def obtener_cargos_usuario(usuario_id):
     conexion = sqlite3.connect('BD/usuarios.db')
@@ -598,7 +599,7 @@ def obtener_cargos_usuario(usuario_id):
 
     # Incluir el ID del cargo en la consulta
     cursor.execute('''
-        SELECT cargos.id AS cargo_id, cargos.nombre AS cargo, areas_organizacionales.nombre AS area
+        SELECT usuarios_cargos.id AS id, cargos.nombre AS cargo, areas_organizacionales.nombre AS area
         FROM usuarios_cargos
         JOIN cargos ON usuarios_cargos.cargo_id = cargos.id
         JOIN areas_organizacionales ON cargos.area_id = areas_organizacionales.id
@@ -609,6 +610,28 @@ def obtener_cargos_usuario(usuario_id):
     cargos = [{"id": fila[0], "cargo": fila[1], "area": fila[2]} for fila in cursor.fetchall()]
     conexion.close()
     return jsonify(cargos)
+
+#Remover Cargo
+@app.route('/api/remover-cargo/<int:cargo_id>', methods=['DELETE'])
+def remover_cargo(cargo_id):
+    try:
+        conexion = sqlite3.connect('BD/usuarios.db')
+        cursor = conexion.cursor()
+
+        # Verificar si el cargo existe
+        cursor.execute('SELECT * FROM usuarios_cargos WHERE id = ?', (cargo_id,))
+        if not cursor.fetchone():
+            return jsonify({"error": "El cargo no existe o no está asignado a ningún usuario"}), 404
+
+        # Eliminar el cargo del usuario en la tabla intermedia
+        cursor.execute('DELETE FROM usuarios_cargos WHERE id = ?', (cargo_id,))
+        conexion.commit()
+        conexion.close()
+
+        return jsonify({"success": True, "message": "El cargo ha sido eliminado correctamente"})
+    except Exception as e:
+        print(f"Error al eliminar el cargo: {e}")
+        return jsonify({"error": "Error interno del servidor"}), 500
 
 # Llamar a la función para inicializar la base de datos
 if __name__ == "__main__":

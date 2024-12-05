@@ -19,13 +19,23 @@
     <!-- Barra de herramientas -->
     <nav class="toolbar">
         <ul>
-            <!-- Acciones sobre usuarios seleccionados -->
+            <!-- Acciones sobre usuario seleccionado -->
             <li class="dropdown">
                 <a href="#" class="dropbtn">Acciones por Usuario</a>
                 <div class="dropdown-content">
                     <a href="#" onclick="handleAction('update')">Actualizar datos</a>
                     <a href="#" onclick="handleAction('access')">Cambiar nivel de acceso</a>
                     <a href="#" onclick="messageToUser()">Mensaje Individual</a>
+                </div>
+            </li>
+
+            <!-- Acciones sobre cargo de usuario seleccionado -->
+            <li class="dropdown">
+                <a href="#" class="dropbtn">Acciones por Cargo</a>
+                <div class="dropdown-content">
+                    <a href="#" onclick="handleCargoAction('nuevo_cargo')">Editar cargo</a>
+                    <a href="#" onclick="handleCargoAction('editar_cargo')">Editar cargo</a>
+                    <a href="#" onclick="handleCargoAction('remover_cargo')">Remover cargo</a>                    
                 </div>
             </li>
         
@@ -85,8 +95,7 @@
     <script src="{{ url_for('static', filename='JS/tabla_interactiva.js') }}"></script>
     <!-- Archivo para manejar la barra de herramientas depende de tabla_interactiva-->
     <script src="{{ url_for('static', filename='JS/toolbar_actions.js') }}"></script>
-    <!-- scrip para gestionar la pagina de origen de editar usuario -->
-    <script src="{{ url_for('static', filename='JS/origen.js') }}"></script>
+    <!-- scrip para gestionar la pagina de origen de editar usuario -->    
     <script src="{{ url_for('static', filename='JS/origen.js') }}"></script>
     <script>
         setOrigenFormulario("gestion_usuarios");

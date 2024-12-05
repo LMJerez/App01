@@ -145,31 +145,89 @@ function handleCargoAction(action) {
     }
 
     switch (action) {
-        case 'edit':
+        case 'nuevo_cargo':
+            window.location.href = `/editar/cargo/${selectedCargoId}`;
+            break;
+        
+        case 'editar_cargo':
             window.location.href = `/editar/cargo/${selectedCargoId}`;
             break;
 
-        case 'remove':
-            if (confirm("¿Estás seguro de que deseas eliminar este cargo?")) {
-                removeCargo(selectedCargoId);
-            }
+        case 'remover_cargo':
+            showDeleteCargoDialog(selectedCargoId); // Mostrar el diálogo dinámico
             break;
-
+    
         default:
             console.error(`Acción desconocida: ${action}`);
     }
 }
 
+// Mostrar el dialogo de confirmacion para remover cargo usuario
+function showDeleteCargoDialog(cargoId) {
+    // Crear el diálogo dinámicamente
+    const dialog = document.createElement("dialog");
+    dialog.innerHTML = `
+        <form method="dialog">
+            <h3>Confirmar Eliminación</h3>
+            <div>
+                <p>¿Estás seguro de que deseas remover el cargo con ID ${cargoId} para el usuario?</p>
+                <p>¡Sera eliminado definitivamente!</p>
+            </div>
+            <div class="form-buttons">
+                <button value="confirm">Eliminar</button>
+                <button value="cancel" class="button naranja">Cancelar</button>
+            </div>
+        </form>
+    `;
+    document.body.appendChild(dialog);
+
+    // Manejar la respuesta del diálogo
+    dialog.addEventListener("close", () => {
+        const response = dialog.returnValue;
+        if (response === "confirm") {
+            // Llamar a la función para eliminar el cargo
+            removeCargo(cargoId);
+        }
+        dialog.remove(); // Eliminar el diálogo del DOM
+    });
+
+    // Mostrar el diálogo
+    dialog.showModal();
+}
+ 
 async function removeCargo(cargoId) {
     try {
-        const response = await fetch(`/api/cargos/${cargoId}`, { method: "DELETE" });
+        const response = await fetch(`/api/remover-cargo/${cargoId}`, {
+            method: 'DELETE'
+        });
+
         if (!response.ok) {
-            throw new Error(`Error al eliminar cargo: ${response.statusText}`);
+            const errorData = await response.json();
+            alert(`Error al eliminar el cargo: ${errorData.error}`);
+            return;
         }
-        alert("Cargo eliminado con éxito.");
-        const usuarioId = TableManager.getSelectedId(); // ID del usuario actual
-        if (usuarioId) cargarCargos(usuarioId); // Recargar cargos del usuario
+
+        const result = await response.json();
+        alert(result.message); // Mostrar mensaje de éxito
+        console.log("Cargo eliminado:", cargoId);
+
+        // Recargar los cargos del usuario seleccionado
+        const usuarioId = TableManager.getSelectedId(); // ID del usuario seleccionado
+        if (usuarioId) {
+            cargarCargos(usuarioId) // Volver a cargar la tabla de cargos
+                .then(() => {
+                    // Simular el clic en la fila del usuario seleccionado
+                    const filaUsuario = document.querySelector(`table#usuarios-tbody .id.selected`);
+                    if (filaUsuario) {
+                        filaUsuario.click(); // Activar el evento de clic en la fila seleccionada
+                    }
+                })
+                .catch(error => {
+                    console.error("Error al recargar los cargos:", error);
+                });
+        }
     } catch (error) {
-        console.error("Error eliminando cargo:", error);
+        console.error("Error al eliminar el cargo:", error);
+        alert("Ocurrió un error al intentar eliminar el cargo.");
     }
 }
