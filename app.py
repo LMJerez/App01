@@ -633,6 +633,43 @@ def remover_cargo(cargo_id):
         print(f"Error al eliminar el cargo: {e}")
         return jsonify({"error": "Error interno del servidor"}), 500
 
+#Ruta para cargos disponibles
+@app.route('/api/cargos_disponibles', methods=['GET'])
+def obtener_cargos_disponibles():
+    conexion = sqlite3.connect('BD/usuarios.db')
+    cursor = conexion.cursor()
+    
+    cursor.execute('SELECT id, nombre FROM cargos ORDER BY nombre ASC')
+    cargos = [{"id": row[0], "nombre": row[1]} for row in cursor.fetchall()]
+    
+    conexion.close()
+    return jsonify(cargos)
+
+#Ruta para agregar nueo cargo
+@app.route('/api/usuarios_cargos', methods=['POST'])
+def agregar_cargo_usuario():
+    data = request.json
+    usuario_id = data.get('usuario_id')
+    cargo_id = data.get('cargo_id')
+
+    if not usuario_id or not cargo_id:
+        return jsonify({"error": "Datos incompletos"}), 400
+
+    conexion = sqlite3.connect('BD/usuarios.db')
+    cursor = conexion.cursor()
+
+    # Insertar el nuevo registro en la tabla usuarios_cargos
+    cursor.execute('''
+        INSERT INTO usuarios_cargos (usuario_id, cargo_id)
+        VALUES (?, ?)
+    ''', (usuario_id, cargo_id))
+    
+    conexion.commit()
+    conexion.close()
+
+    return jsonify({"success": "Cargo asignado correctamente"}), 201
+
+
 # Llamar a la función para inicializar la base de datos
 if __name__ == "__main__":
     inicializar_bd()  # Asegúrate de que la base de datos esté creada

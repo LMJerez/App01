@@ -194,7 +194,8 @@ function showDeleteCargoDialog(cargoId) {
     // Mostrar el diálogo
     dialog.showModal();
 }
- 
+
+//Eliminar cargo usuario
 async function removeCargo(cargoId) {
     try {
         const response = await fetch(`/api/remover-cargo/${cargoId}`, {
@@ -230,4 +231,74 @@ async function removeCargo(cargoId) {
         console.error("Error al eliminar el cargo:", error);
         alert("Ocurrió un error al intentar eliminar el cargo.");
     }
+}
+
+//Agregar nuevo cargo usuario
+async function agregarCargo() {
+    const usuarioId = TableManager.getSelectedId();
+    if (!usuarioId) {
+        alert("Por favor, selecciona un usuario primero.");
+        return;
+    }
+
+    // Obtener los cargos disponibles desde el backend
+    let cargosDisponibles = [];
+    try {
+        const response = await fetch('/api/cargos_disponibles');
+        if (!response.ok) {
+            throw new Error('Error al obtener los cargos disponibles');
+        }
+        cargosDisponibles = await response.json();
+    } catch (error) {
+        console.error(error);
+        alert("No se pudo cargar la lista de cargos.");
+        return;
+    }
+
+    // Crear el diálogo dinámicamente
+    const dialog = document.createElement("dialog");
+    dialog.innerHTML = `
+        <form method="dialog">
+            <h3>Asignar Nuevo Cargo</h3>
+            <div>
+                <label for="cargo-select">Seleccione un cargo:</label>
+                <select id="cargo-select" required>
+                    ${cargosDisponibles.map(cargo => `
+                        <option value="${cargo.id}">${cargo.nombre}</option>
+                    `).join('')}
+                </select>
+            </div>
+            <div class="form-buttons">
+                <button value="confirm">Agregar</button>
+                <button value="cancel" class="button naranja">Cancelar</button>
+            </div>
+        </form>
+    `;
+    document.body.appendChild(dialog);
+
+    // Mostrar el diálogo
+    dialog.showModal();
+
+    // Manejar el resultado del diálogo
+    dialog.addEventListener('close', async () => {
+        if (dialog.returnValue === 'confirm') {
+            const cargoId = document.getElementById("cargo-select").value;
+            try {
+                const response = await fetch('/api/usuarios_cargos', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ usuario_id: usuarioId, cargo_id: cargoId })
+                });
+                if (!response.ok) {
+                    throw new Error('Error al asignar el cargo');
+                }
+                alert("Cargo asignado correctamente.");
+                cargarCargos(usuarioId); // Recargar la tabla de cargos
+            } catch (error) {
+                console.error(error);
+                alert("No se pudo asignar el cargo.");
+            }
+        }
+        dialog.remove(); // Eliminar el diálogo después de cerrarlo
+    });
 }
